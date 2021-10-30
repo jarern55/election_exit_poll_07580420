@@ -59,7 +59,7 @@ class _LoginPageState extends State<LoginPage> {
                                   Theme.of(context).textTheme.headline1?.color,
                             ),
                             Text(
-                              'LOGIN',
+                              'LOGINs',
                               style: Theme.of(context).textTheme.headline1,
                             ),
                             SizedBox(height: 6.0),
