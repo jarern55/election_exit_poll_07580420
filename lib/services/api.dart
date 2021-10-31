@@ -7,14 +7,14 @@ class Api {
   static const BASE_URL = 'https://cpsu-test-api.herokuapp.com';
 
   Future<dynamic> submit(
-    String endPoint,
-    Map<String, dynamic> params,
+    String endPoint,String s,
+   int candidateNumber,
   ) async {
     var url = Uri.parse('$BASE_URL/$endPoint');
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode(params),
+      headers: {'Content-Type': 'application/json','id' : '07580420'},
+      body: json.encode(candidateNumber),
     );
 
     if (response.statusCode == 200) {
@@ -36,13 +36,13 @@ class Api {
   }
 
   Future<dynamic> fetch(
-    String endPoint, {
+    String endPoint, String s, {
     Map<String, dynamic>? queryParams,
   }) async {
     String queryString = Uri(queryParameters: queryParams).query;
     var url = Uri.parse('$BASE_URL/$endPoint?$queryString');
 
-    final response = await http.get(url);
+    final response = await http.get(url,headers: {'Content-Type': 'application/json','id' : '07580420'});
 
     if (response.statusCode == 200) {
       // แปลง text ที่มีรูปแบบเป็น JSON ไปเป็น Dart's data structure (List/Map)

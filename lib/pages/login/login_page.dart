@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_food/pages/home/home_page.dart';
+import 'package:flutter_food/models/api_result.dart';
+
 import 'package:flutter_food/services/api.dart';
 
 class LoginPage extends StatefulWidget {
@@ -16,6 +17,11 @@ class _LoginPageState extends State<LoginPage> {
   static const PIN_LENGTH = 6;
   var _input = '';
   var _isLoading = false;
+  Map<String , dynamic> a = {'year':0,'month':0,'day':0};
+  List tittlename = ['','','','',''];
+  List number = ['','','','',''];
+  List name = ['','','','',''];
+
 
   @override
   Widget build(BuildContext context) {
@@ -43,65 +49,63 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
             child: SafeArea(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.lock_outline,
-                              size: 90.0,
-                              color:
-                                  Theme.of(context).textTheme.headline1?.color,
-                            ),
-                            Text(
-                              'LOGINs',
-                              style: Theme.of(context).textTheme.headline1,
-                            ),
-                            SizedBox(height: 6.0),
-                            Text(
-                              'Enter PIN to login',
-                              style: Theme.of(context).textTheme.bodyText2,
-                            )
-                          ],
+              child: Center(
+                child: Column(
+                  children: [
+
+                          Icon(
+                            Icons.poll,
+                            size: 90.0,
+                            color:
+                                Theme.of(context).textTheme.headline1?.color,
+                          ),
+                          Text(
+                            'การเลือกตั้ง อบต.',
+                            style: Theme.of(context).textTheme.headline1,
+                          ),
+                          SizedBox(height: 6.0),
+                          Text(
+                            'Exit Poll',
+                            style: Theme.of(context).textTheme.bodyText2,
+                          ),
+                    TextButton(
+
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                                (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.focused))
+                                return Colors.red;
+                              return null; // Defer to the widget's default.
+                            }
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            for (var i = 0; i < _input.length; i++)
-                              Container(
-                                margin: EdgeInsets.all(4.0),
-                                width: 24.0,
-                                height: 24.0,
-                                decoration: BoxDecoration(
-                                    color:
-                                        Theme.of(context).colorScheme.primary,
-                                    shape: BoxShape.circle),
-                              ),
-                            for (var i = _input.length; i < 6; i++)
-                              Container(
-                                margin: EdgeInsets.all(4.0),
-                                width: 24.0,
-                                height: 24.0,
-                                decoration: BoxDecoration(
-                                  color: Theme.of(context)
-                                      .colorScheme
-                                      .primary
-                                      .withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                              ),
-                          ],
-                        )
-                      ],
+                      ),
+                      onPressed: () { _handleClickButton(5);
+
+
+                      },
+                      child: Text('ดูรายชื่อผู้ลงสมัคร'),
+                    ),for(int i =0;i<5;i++)
+                    TextButton(
+                      style: ButtonStyle(
+                        overlayColor: MaterialStateProperty.resolveWith<Color?>(
+                                (Set<MaterialState> states) {
+                              if (states.contains(MaterialState.focused))
+                                return Colors.red;
+                              return null; // Defer to the widget's default.
+                            }
+                        ),
+                      ),
+                      onPressed: () { 
+                        _handleClickButton2();
+                      },
+                      child: Text('${number[i]} ${tittlename[i]}${name[i]}'),
                     ),
-                  ),
-                  _buildNumPad(),
-                ],
+
+
+
+
+                  ],
+                ),
               ),
             ),
           ),
@@ -121,64 +125,45 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Widget _buildNumPad() {
-    return Container(
-      padding: EdgeInsets.all(16.0),
-      child: Column(
-        children: [
-          [1, 2, 3],
-          [4, 5, 6],
-          [7, 8, 9],
-          [-2, 0, -1],
-        ].map((row) {
-          return Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: row.map((item) {
-              return Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: LoginButton(
-                  number: item,
-                  onClick: () {
-                    _handleClickButton(item);
-                  },
-                ),
-              );
-            }).toList(),
-          );
-        }).toList(),
-      ),
-    );
-  }
+
 
   _handleClickButton(int num) async {
     print('You pressed $num');
+    //Api().fetch('exit_poll','07580420');
+    var isLogin = (await Api().fetch('exit_poll','07580420')).toList();
 
-    if (num == -1) {
-      if (_input.length > 0) {
-        setState(() {
-          _input = _input.substring(0, _input.length - 1);
-        });
+      //print('loging na ja ${isLogin[0]['candidateName']}');
+
+       setState(() {
+         for(int i=0;i<5;i++){
+           name[i] = isLogin[i]['candidateName'];
+         }
+         for(int i=0;i<5;i++){
+           number[i] = isLogin[i]['candidateNumber'];
+         }
+         for(int i=0;i<5;i++){
+           tittlename[i] = isLogin[i]['candidateTitle'];
+         }
+
+       });
       }
-    } else {
-      setState(() {
-        _input = '$_input$num';
-      });
-    }
 
-    if (_input.length == PIN_LENGTH) {
-      var isLogin = await _login(_input);
 
-      if (isLogin == null) return;
+  _handleClickButton2() async {
 
-      if (isLogin) {
-        Navigator.pushReplacementNamed(context, HomePage.routeName);
-      } else {
-        setState(() {
-          _input = '';
-        });
-        _showMaterialDialog('LOGIN FAILED', 'Invalid PIN. Please try again.');
-      }
-    }
+
+    var isLogin = (await Api().submit('exit_poll','07580420',1)).toString();
+
+    if (isLogin == null) return;
+
+
+
+      _showMaterialDialog('บันทักข้อมูลสำเร็จ', '$isLogin');
+
+
+
+
+
   }
 
   void _showMaterialDialog(String title, String msg) {
@@ -203,69 +188,12 @@ class _LoginPageState extends State<LoginPage> {
     );
   }
 
-  Future<bool?> _login(String pin) async {
-    try {
-      setState(() {
-        _isLoading = true;
-      });
 
-      var isLogin = (await Api().submit('login', {'pin': pin})) as bool;
-      print('LOGIN: $isLogin');
-      return isLogin;
-    } catch (e) {
-      print(e);
-      _showMaterialDialog('ERROR', e.toString());
-      return null;
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
-}
 
-class LoginButton extends StatelessWidget {
-  final int number;
-  final Function() onClick;
 
-  const LoginButton({
-    required this.number,
-    required this.onClick,
-    Key? key,
-  }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      customBorder: CircleBorder(),
-      onTap: number == -2 ? null : onClick,
-      child: Container(
-        width: 75.0,
-        height: 75.0,
-        decoration: number == -2
-            ? null
-            : BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white.withOpacity(0.5),
-                border: Border.all(
-                  width: 3.0,
-                  color: Theme.of(context).textTheme.headline1!.color!,
-                ),
-              ),
-        child: Center(
-          child: number >= 0
-              ? Text(
-                  '$number', // number.toString()
-                  style: Theme.of(context).textTheme.headline6,
-                )
-              : (number == -1
-                  ? Icon(
-                      Icons.backspace_outlined,
-                      size: 28.0,
-                    )
-                  : SizedBox.shrink()),
-        ),
-      ),
-    );
-  }
-}
+
+
+
+
